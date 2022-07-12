@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-nodejs16.x
+
+  Sample SAM Template for lambda-nodejs16.x
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+
+Resources:
+  HelloWorldFunctionOne:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Metadata:
+      BuildProperties:
+        UseNpmCi: True
+    Properties:
+      CodeUri: hello-world-1/
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Timeout: 300
+      PackageType: Zip
+      Architectures:
+        - x86_64
+      Layers:
+        - !Ref NodeJS16Layer
+      Environment:
+        Variables:
+          TEST_ENV_ONE: !Ref TEST_ENV_ONE
+          TEST_ENV_TWO: !Ref TEST_ENV_TWO
+          HELLO_WORLD_1_API_URL: !Ref HELLO_WORLD_1_API_URL
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello-1
+            Method: get
+  HelloWorldFunctionTwo:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildProperties:
+        UseNpmCi: True
+    Properties:
+      CodeUri: hello-world-2/
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Timeout: 180
+      PackageType: Zip
+      Architectures:
+        - x86_64
+      Layers:
+        - !Ref NodeJS16Layer
+      Environment:
+        Variables:
+          HELLO_WORLD_2_API_URL: !Ref HELLO_WORLD_2_API_URL
+          TEST_ENV_ONE: !Ref TEST_ENV_ONE
+          TEST_ENV_TWO: !Ref TEST_ENV_TWO
+      Events:
+        HelloWorldTwo:
+          Type: Api
+          Properties:
+            Path: /hello-2
+            Method: get
+  HelloWorldFunctionThree:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildProperties:
+        UseNpmCi: True
+    Properties:
+      CodeUri: hello-world-3/
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Timeout: 30
+      PackageType: Zip
+      Architectures:
+        - x86_64
+      Layers:
+        - !Ref NodeJS14Layer
+      Environment:
+        Variables:
+          HELLO_WORLD_3_API_URL: !Ref HELLO_WORLD_3_API_URL
+          TEST_ENV_ONE: !Ref TEST_ENV_ONE
+      Events:
+        HelloWorldTwo:
+          Type: Api
+          Properties:
+            Path: /hello-3
+            Method: get
+  NodeJS16Layer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nodejs16-lambda-layer
+      Description: test
+      ContentUri: nodejs16-dependencies/
+      CompatibleRuntimes:
+        - nodejs16.x
+    Metadata:
+      BuildMethod: nodejs16.x
+      BuildArchitecture: x86_64
+  NodeJS14Layer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nodejs14-lambda-layer
+      Description: test
+      ContentUri: nodejs14-dependencies/
+      CompatibleRuntimes:
+        - nodejs14.x
+    Metadata:
+      BuildMethod: nodejs14.x
+      BuildArchitecture: x86_64
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
